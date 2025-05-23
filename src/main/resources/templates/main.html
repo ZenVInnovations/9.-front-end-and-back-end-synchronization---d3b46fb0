@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Booking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        nav {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 1rem;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none; /* Hide all sections by default */
+        }
+        .container.active {
+            display: block; /* Show the active section */
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input, .form-group select, .form-group button {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .form-group button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ticket Booking System</h1>
+    </header>
+    <nav>
+        <a onclick="showSection('create-ticket')">Create Ticket</a>
+        <a onclick="showSection('list-tickets')">List Tickets</a>
+        <a onclick="showSection('get-ticket')">Find Ticket</a>
+        <a onclick="showSection('delete-ticket')">Delete Ticket</a>
+    </nav>
+
+    <!-- Create Ticket Section -->
+    <section id="create-ticket" class="container">
+        <h2>Create Ticket</h2>
+        <form id="createTicketForm">
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="source">Source:</label>
+                <input type="text" id="source" name="source" placeholder="Enter source station" required>
+            </div>
+            <div class="form-group">
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination" placeholder="Enter destination station" required>
+            </div>
+            <div class="form-group">
+                <label for="event">Select Event:</label>
+                <select id="event" name="event" required>
+                    <option value="">--Select an Event--</option>
+                    <option value="concert">Concert</option>
+                    <option value="movie">Movie</option>
+                    <option value="play">Play</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tickets">Number of Tickets:</label>
+                <input type="number" id="tickets" name="tickets" min="1" placeholder="Enter number of tickets" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Create Ticket</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Updated List Tickets Section -->
+    <section id="list-tickets" class="container">
+        <h2>List All Tickets</h2>
+        <button id="listTicketsButton">Show All Tickets</button>
+        <table id="ticketsTable" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+                <tr style="background-color: #007bff; color: white;">
+                    <th style="border: 1px solid #ddd; padding: 8px;">Ticket ID</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Source</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Destination</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Event</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Tickets</th>
+                </tr>
+            </thead>
+            <tbody id="ticketsTableBody">
+                <!-- Rows will be dynamically added here -->
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Find Ticket Section -->
+    <section id="get-ticket" class="container">
+        <h2>Find Ticket by ID</h2>
+        <form id="getTicketForm">
+            <div class="form-group">
+                <label for="ticketId">Ticket ID:</label>
+                <input type="number" id="ticketId" name="ticketId" placeholder="Enter ticket ID" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Find Ticket</button>
+            </div>
+        </form>
+        <p id="ticketDetails"></p>
+    </section>
+
+    <!-- Delete Ticket Section -->
+    <section id="delete-ticket" class="container">
+        <h2>Delete Ticket by ID</h2>
+        <form id="deleteTicketForm">
+            <div class="form-group">
+                <label for="deleteTicketId">Ticket ID:</label>
+                <input type="number" id="deleteTicketId" name="deleteTicketId" placeholder="Enter ticket ID" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Delete Ticket</button>
+            </div>
+        </form>
+        <p id="deleteMessage"></p>
+    </section>
+
+    <script>
+        const tickets = [];
+        let ticketCounter = 1;
+
+        // Function to show the selected section
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.container');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Show the "Create Ticket" section by default
+        showSection('create-ticket');
+
+        // Create Ticket
+        document.getElementById('createTicketForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const source = document.getElementById('source').value;
+            const destination = document.getElementById('destination').value;
+            const eventSelected = document.getElementById('event').value;
+            const ticketsCount = parseInt(document.getElementById('tickets').value, 10);
+
+            if (name && source && destination && eventSelected && ticketsCount > 0) {
+                const ticket = {
+                    id: ticketCounter++,
+                    name,
+                    source,
+                    destination,
+                    event: eventSelected,
+                    tickets: ticketsCount
+                };
+                tickets.push(ticket);
+                alert(`Ticket created successfully! Ticket ID: ${ticket.id}`);
+            } else {
+                alert('Please fill out all fields correctly.');
+            }
+        });
+
+        // List Tickets with Table
+        document.getElementById('listTicketsButton').addEventListener('click', function () {
+            const ticketsTableBody = document.getElementById('ticketsTableBody');
+            ticketsTableBody.innerHTML = ''; // Clear previous rows
+
+            if (tickets.length > 0) {
+                tickets.forEach(ticket => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${ticket.id}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${ticket.name}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${ticket.source}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${ticket.destination}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${ticket.event}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${ticket.tickets}</td>
+                    `;
+                    ticketsTableBody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="6" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No tickets available.</td>
+                `;
+                ticketsTableBody.appendChild(row);
+            }
+        });
+
+        // Find Ticket by ID
+        document.getElementById('getTicketForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const ticketId = parseInt(document.getElementById('ticketId').value, 10);
+            const ticket = tickets.find(t => t.id === ticketId);
+            const ticketDetails = document.getElementById('ticketDetails');
+            if (ticket) {
+                ticketDetails.textContent = `ID: ${ticket.id}, Name: ${ticket.name}, Source: ${ticket.source}, Destination: ${ticket.destination}, Event: ${ticket.event}, Tickets: ${ticket.tickets}`;
+            } else {
+                ticketDetails.textContent = 'Ticket not found.';
+            }
+        });
+
+        // Delete Ticket by ID
+        document.getElementById('deleteTicketForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const ticketId = parseInt(document.getElementById('deleteTicketId').value, 10);
+            const ticketIndex = tickets.findIndex(t => t.id === ticketId);
+            const deleteMessage = document.getElementById('deleteMessage');
+            if (ticketIndex !== -1) {
+                tickets.splice(ticketIndex, 1);
+                deleteMessage.textContent = 'Ticket deleted successfully.';
+            } else {
+                deleteMessage.textContent = 'Ticket not found.';
+            }
+        });
+    </script>
+</body>
+</html>
